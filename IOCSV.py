@@ -2,9 +2,9 @@
 """
 @author: hectorhmx
 """
-from Tabla import Paquetes
+import Tabla
 import csv
-def rPacks(pwdo,tipo,tam = -1,pos = 0): ##lee y ordena los paquetes no se encarga del origen y destino, ese 
+def rPacks(pwdo,tipo,tam = -1,pos = 0,tipoant=-1): ##lee y ordena los paquetes no se encarga del origen y destino, ese 
     try:
         with open(pwdo, newline='') as entrada:
             entrada.seek(pos)
@@ -20,7 +20,7 @@ def rPacks(pwdo,tipo,tam = -1,pos = 0): ##lee y ordena los paquetes no se encarg
                 #self,nombre,peso,tamano,origen,destino
                 #weight,size,destino,nombre
                 # 0      1    2        3
-                    lista.append(Paquetes(row[3],float(row[0]),float(row[1]),"",int(row[2]))-1)
+                    lista.append(Tabla.Paquetes(row[3],float(row[0]),float(row[1]),"",int(row[2]))-1)
                 else:
                     raise
             return (lista,-1)
@@ -38,12 +38,9 @@ def wPacks(pwds,lista):
         salida = open(pwds,'a+',newline = '')
         escritor = csv.writer(salida, delimiter=',')
         for i in lista:
-            if(isinstance(i,Paquetes)):
+            if(isinstance(i,Tabla.Paquetes)):
                 i.bandera = True
                 escritor.writerow(i.toString())
             else:
                 escritor.writerow(str(i))
-                
-            
-        
                 

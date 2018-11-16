@@ -5,16 +5,20 @@
 import numpy as np
 from random import randint
 from DoubleQuickSort import DoubleQuickSort
+from DoubleQuickSort import obtener_numero
+from mydijkstra import mydijkstra
 import IOCSV as io 
 class Aeropuerto:
-    indice = None
+    indice = None #indice en la lista del grafo
     P = "" ##Tendrá ubicación original archivo
     p = "" ##Tendrá ubicación de paquetes ordenados por archivo
+    pos = 0#Tendra la posicion del archivo
     rep = "" ###Tendra el reporte
-    aviones = []
-    paquetes = []
-    control = None
-    nombre = None
+    aviones = [] #todos los aviones
+    paquetes = [] ## todos del mismo destino 
+    control = None #grafo
+    nombre = None #nombre de este aeropuerto
+    terminado = False #cuando acabe el programa
     def __init__(self,graph,indice,P,p,rep):
         self.control = graph
         self.P = P
@@ -24,11 +28,11 @@ class Aeropuerto:
     def sortPacks(self):#c
         DoubleQuickSort(self.paquetes)
     def sortOrigins(self): ##ordena el archivo por origenes, los manda a otro  #C
-        (lista,pos) = io.rPacks(self.P,"PACK")###leeremos cargamos el archivo a la ram
+        (lista,pos) = io.rPacks(self.P,"PACK")###leeremos cargamos el archivo a la ram ##ordenamiento externo
         if(pos!=-1):
             print("Algo paso al cargar origins")
             raise
-        DoubleQuickSort(lista)
+        DoubleQuickSort(lista) ##aqui ordeno para cargarlo al archivo ## ordenamiento externo
         io.wPacks(self.p,lista)
         ##leer del archivo
     def ask4Plane(self):#c
@@ -40,22 +44,35 @@ class Aeropuerto:
                 return
         print("No se consiguió un avion")
         raise
-    def recivePlane(self,avion):##recibirá los aviones
-        string = avion.stoString
-        if(len(avion.elementos) > 0):
-            io.wPacks(self.rep,string)
+    def recivePlane(self,avion):##recibirá los aviones #c
+        string = avion.toString
+        io.wPacks(self.rep,string)
         self.aviones.append(avion)#
-    def sendPlane(self,destino):
-            print("hola")
-            ##Aquí se enviaran los aviones
-    def getPlane(self):
-        if(len(self.aviones>0)):
+    def sendPlane(self,destino): ##sera llamado por una función llamada work #c+-
+        avion = self.getPlane()
+        if( (not self.terminado)  and (self.paquetes[0].destino == destino)):
+            self.fillPlane(avion)
+        ## riesgo de que se envién vacios si no esta bien cordinado
+        ##calcularemos la mejor ruta con distra
+        ruta = mydijkstra(self.control,self.indice,destino)
+        avion.ruta = ruta
+        try:
+            self.control.lista[ruta[len(ruta)]-1].recivePlane(avion)
+        except:
+            print("problema al send plane")
+            raise
+        ##Aquí se enviaran los aviones
+    def getPlane(self):#c
+        if(len(self.aviones)<=0):
+            self.ask4Plane()
+        try:
             avion = self.aviones.pop()
             avion.fillgas()
-        else:
-            avion = self.ask4Plane()
-        return avion
-    def fillpacks(self):
+            return avion
+        except:
+            print("problema al sacar avion de la cola")
+            raise
+    def fillpacks(self):##esta se encargara de que packs este lleno
             #Aquí leere del archivo y se cargará en la ram
             for i in range(len(self.paquetes),101):#Solo 100 paquetes
                 
@@ -64,13 +81,26 @@ class Aeropuerto:
                 self.paquetes.append(1)#aqui leeremos del archivo ##siempre que sea la misma
                 
             ##podría ocupar excepciones    
-            self.sortPacks()
             print("hola")
     def fillPlane(self,avion):
-        avion = self.getPlane()
         self.fillpacks()
-        ###DoubleQuickSort()
-        return avion
+        self.sortPacks()
+        if(len(self.paquetes) == 0):
+           self.terminado = True
+        peso = 0
+        elem = [] #elementos a eliminar
+        for i in range(len(self.paquetes)):    
+            if(obtener_numero(self.paquetes[i]) + peso <= avion.pesoMax):
+                try:
+                    avion.addPack(self.paquetes[i])
+                    peso+=self.paquetes[i].peso
+                    elem.append(self.paquetes[i])
+                except:
+                    print("Error al sacar un paquete")
+                    raise
+        for i in reverse()
+        
+            
         #falta llenar los aviones
     
         
@@ -106,12 +136,17 @@ class Avion:
     pesoMax = 1999 #kg
     origen = None
     destino = None
+    ruta = []
     elementos = [] # debe ser aprovechado
     def __init__(self,origen,destino):
         self.origen = origen
         self.destino = destino
     def fillGas(self):
         self.gas = 1000.0
+    def toString(self):
+        print("hola")
+    def addPack(self,paquete):
+        self.elementos.append(paquete)
 class Graph:
     matrix = None
     lista = None
