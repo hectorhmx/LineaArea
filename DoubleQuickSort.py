@@ -132,7 +132,7 @@ def DoubleQuickSort(arreglo):
     contdir = 0
     continv = 0
     for i in range(1,len(arreglo)):
-        if(arreglo[i-1]<=arreglo[i]):
+        if(obtener_numero(arreglo[i-1])<=obtener_numero(arreglo[i])):
             contdir+=1
             
     if(contdir==len(arreglo)-1):
@@ -143,7 +143,7 @@ def DoubleQuickSort(arreglo):
       #  print(len(arreglo)-1)
     
     for i in range(1,len(arreglo)):
-        if(arreglo[i-1]>=arreglo[i]):
+        if(obtener_numero(arreglo[i-1])>=obtener_numero(arreglo[i])):
             continv+=1
             
     if(continv == len(arreglo)-1):
@@ -157,3 +157,5 @@ def DoubleQuickSort(arreglo):
         QuickSortHectorb(arreglo)
     else:
         QuickSort(arreglo)
+
+

@@ -5,7 +5,6 @@
 import numpy as np
 from random import randint
 from DoubleQuickSort import DoubleQuickSort
-from DoubleQuickSort import obtener_numero
 from mydijkstra import mydijkstra
 import IOCSV as io 
 class Aeropuerto:
@@ -72,34 +71,45 @@ class Aeropuerto:
         except:
             print("problema al sacar avion de la cola")
             raise
-    def fillpacks(self):##esta se encargara de que packs este lleno
-            #Aquí leere del archivo y se cargará en la ram
-            for i in range(len(self.paquetes),101):#Solo 100 paquetes
-                
-                #pack =Paquetes(datos) leer de archivo
-                #pack.bool = True
-                self.paquetes.append(1)#aqui leeremos del archivo ##siempre que sea la misma
-                
-            ##podría ocupar excepciones    
-            print("hola")
-    def fillPlane(self,avion):
+    def fillpacks(self):#c ##esta se encargara de que packs este lleno
+            ant = self.pos
+            tipo = 0 #se encarga de ver que los elementos sean del mismo tipo
+            pwd = 'ps5.csv'
+            while(len(self.paquetes)<200): #maximo de paquetes
+                lista,ant = io.rOnePack(pwd,tipo,ant)
+                if(ant == -1):
+                    #print("terminado el archivo")
+                    self.pos = -1
+                    self.terminado = True
+                    return
+                elif(len(lista) == 0):
+                    #print("no ha terminado el archivo, p;pero termino el tipo")
+                    self.pos = ant
+                    return
+                else:
+                    self.pos = ant
+                    tipo = lista[2]
+                    self.paquetes.append(Paquetes(lista[3],float(lista[0]),float(lista[1]),self.indice,int(lista[2]))) ##camiar origen
+
+    def fillPlane(self,avion):#c
         self.fillpacks()
-        self.sortPacks()
+        self.sortPacks() ##se sortean por unidad peso y tamaño
         if(len(self.paquetes) == 0):
            self.terminado = True
+           return
         peso = 0
         elem = [] #elementos a eliminar
         for i in range(len(self.paquetes)):    
-            if(obtener_numero(self.paquetes[i]) + peso <= avion.pesoMax):
+            if(self.paquetes[i].peso + peso <= avion.pesoMax):
                 try:
-                    avion.addPack(self.paquetes[i])
+                    avion.addPack(self.paquetes[i]) ##se añaden los paquetes al avion
                     peso+=self.paquetes[i].peso
-                    elem.append(self.paquetes[i])
+                    elem.append(i)
                 except:
                     print("Error al sacar un paquete")
                     raise
-        for i in reverse()
-        
+        for i in reversed(elem):
+            self.paquetes.pop(i)
             
         #falta llenar los aviones
     
@@ -125,10 +135,10 @@ class Paquetes:
             return self.unidad
         else:
             return self.destino
-    def toString(self):
+    def toList(self):
         #formato:
-        #weight,size,destino,nombre
-        string = str(self.peso)+str(self.tamano)+str(self.destino)+str(self.nombre)
+        #weight,size,destino,nombre,origen
+        string = [self.peso,self.tamano,self.destino,self.nombre,self.origen]
         return(string)
     
 class Avion:
